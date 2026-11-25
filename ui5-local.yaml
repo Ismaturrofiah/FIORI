@@ -22,14 +22,6 @@ server:
         port: 35729
         path: webapp
         delay: 300
-    - name: ui5-tooling-transpile-middleware
-      afterMiddleware: compression
-      configuration:
-        debug: true
-        transformModulesToUI5:
-          overridesToOverride: true
-        excludePatterns:
-          - /Component-preload.js
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-appreload
       configuration:
@@ -63,10 +55,3 @@ builder:
     excludes:
       - /test/**
       - /localService/**
-  customTasks:
-    - name: ui5-tooling-transpile-task
-      afterTask: replaceVersion
-      configuration:
-        debug: true
-        transformModulesToUI5:
-          overridesToOverride: true

@@ -64,6 +64,16 @@
             "additionalParameters": "allowed"
           }
         }
+      },
+      "outbounds": {
+        "PurchaseRequisitionMaintain": {
+          "semanticObject": "PurchaseRequisition",
+          "action": "maintain",
+          "parameters": {
+            "PurchaseRequisition": {},
+            "PurchaseRequisitionItem": {}
+          }
+        }
       }
     }
   },

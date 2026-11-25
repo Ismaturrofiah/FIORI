@@ -464,15 +464,13 @@
 
                             <!-- 26. Detail Column (Paling Kanan) -->
                             <Column width="110px" hAlign="Center">
-                                <Text text="Detail" tooltip="Navigasi ke Detail Purchase Requisition" />
+                                <Text text="Detail" tooltip="Buka Purchase Requisition di aplikasi standard Manage Purchase Requisitions" />
                             </Column>
                         </columns>
 
                         <!-- Row Template: 0 (No.) + 25 CDS Cells + Aksi Button (Paling Kanan) -->
                         <items>
-                            <ColumnListItem
-                                type="Navigation"
-                                press=".onNavToDetail">
+                            <ColumnListItem type="Inactive">
                                 <cells>
                                     <!-- 0. Row Number -->
                                     <Text text="{tableModel>rowNumber}" />
@@ -600,8 +598,8 @@
                                         icon="sap-icon://navigation-right-arrow"
                                         iconFirst="false"
                                         type="Emphasized"
-                                        tooltip="Buka Detail PR {tableModel>PurchaseRequisition} (Item {tableModel>PurchaseRequisitionItem})"
-                                        press=".onNavToDetail" />
+                                        tooltip="Buka PR {tableModel>PurchaseRequisition} (Item {tableModel>PurchaseRequisitionItem}) di Manage Purchase Requisitions"
+                                        press=".onOpenStandardPR" />
                                 </cells>
                             </ColumnListItem>
                         </items>

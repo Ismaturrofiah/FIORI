@@ -36,15 +36,7 @@ server:
           - framework: Testsuite
           - framework: QUnit
             path: /test/unit/unitTests.qunit.html
-            pattern: /test/unit/controller/*.{js,ts}
-    - name: ui5-tooling-transpile-middleware
-      afterMiddleware: compression
-      configuration:
-        debug: true
-        transformModulesToUI5:
-          overridesToOverride: true
-        excludePatterns:
-          - /Component-preload.js
+            pattern: /test/unit/controller/*.js
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
@@ -66,10 +58,3 @@ builder:
     excludes:
       - /test/**
       - /localService/**
-  customTasks:
-    - name: ui5-tooling-transpile-task
-      afterTask: replaceVersion
-      configuration:
-        debug: true
-        transformModulesToUI5:
-          overridesToOverride: true

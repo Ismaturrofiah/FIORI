@@ -69,6 +69,13 @@
 
                 <f:actions>
                     <Button
+                        text="{i18n>btnOpenStandardPR}"
+                        icon="sap-icon://action"
+                        type="Emphasized"
+                        tooltip="{i18n>btnOpenStandardPRTooltip}"
+                        enabled="{= !!(${detailModel>/PurchaseRequisition} || ${detailViewModel>/prNumber}) }"
+                        press=".onOpenStandardPR" />
+                    <Button
                         text="{i18n>btnRefresh}"
                         icon="sap-icon://refresh"
                         type="Transparent"
@@ -76,7 +83,7 @@
                     <Button
                         text="Kembali"
                         icon="sap-icon://nav-back"
-                        type="Emphasized"
+                        type="Default"
                         press=".onNavBack" />
                 </f:actions>
             </f:DynamicPageTitle>
