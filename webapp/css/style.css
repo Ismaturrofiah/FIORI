@@ -55,3 +55,9 @@
      min-width: 36px !important;
      font-weight: bold;
  }
+ /* Active KPI highlight tile (filters the table) */
+ .kpiTile[data-highlight-active="true"] {
+     outline: 2px solid var(--sapSelectedColor, #0854a0);
+     outline-offset: 2px;
+     background-color: var(--sapList_SelectionBackgroundColor, #e5f0fa);
+ }

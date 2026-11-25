@@ -210,7 +210,7 @@
 
                     <!-- 2. RINGKASAN HIGHLIGHT (TOTAL PR, PR OPEN, PO OPEN) -->
                     <layout:Grid class="kpiGrid">
-                        <!-- 2.1 Total PR Document (Periode Berjalan / Dinamis Sesuai Filter) -->
+                        <!-- 2.1 Total PR Document (Periode Berjalan / Dinamis Sesuai Filter) - klik untuk tampilkan semua -->
                         <GenericTile
                             class="kpiTile sapUiTinyMargin"
                             header="{i18n>kpiTotalDocs}"
@@ -227,10 +227,11 @@
                             </TileContent>
                             <customData>
                                 <core:CustomData key="filterKey" value="ALL" />
+                                <core:CustomData key="highlight-active" value="{= ${viewModel>/selectedHighlight} === 'ALL' ? 'true' : 'false' }" writeToDom="true" />
                             </customData>
                         </GenericTile>
 
-                        <!-- 2.2 PR Open (IsClosed !== 'X') -->
+                        <!-- 2.2 PR Open (PurchaseOrder kosong) - klik untuk filter tabel -->
                         <GenericTile
                             class="kpiTile kpiTileCritical sapUiTinyMargin"
                             header="{i18n>kpiPROpen}"
@@ -247,10 +248,11 @@
                             </TileContent>
                             <customData>
                                 <core:CustomData key="filterKey" value="PR_OPEN" />
+                                <core:CustomData key="highlight-active" value="{= ${viewModel>/selectedHighlight} === 'PR_OPEN' ? 'true' : 'false' }" writeToDom="true" />
                             </customData>
                         </GenericTile>
 
-                        <!-- 2.3 PO Open (IsCompletelyDelivered !== 'X') -->
+                        <!-- 2.3 PO Open (PurchaseOrder terisi, GRDocument kosong) - klik untuk filter tabel -->
                         <GenericTile
                             class="kpiTile kpiTileCritical sapUiTinyMargin"
                             header="{i18n>kpiPOOpen}"
@@ -267,6 +269,7 @@
                             </TileContent>
                             <customData>
                                 <core:CustomData key="filterKey" value="PO_OPEN" />
+                                <core:CustomData key="highlight-active" value="{= ${viewModel>/selectedHighlight} === 'PO_OPEN' ? 'true' : 'false' }" writeToDom="true" />
                             </customData>
                         </GenericTile>
                     </layout:Grid>

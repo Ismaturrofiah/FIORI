@@ -51,6 +51,7 @@ sap.ui.define([
                 selectedStatus: "",
                 selectedCurrency: "",
                 selectedAging: "",
+                selectedHighlight: "ALL", // ALL | PR_OPEN | PO_OPEN (KPI tile filter)
                 pageSize: "50", // Default: 50 items per screen
                 currentPage: 1,
                 totalPages: 1,
@@ -380,37 +381,60 @@ sap.ui.define([
         },
 
         /**
-         * Computes and writes highlight metrics to the view model:
+         * PR Open: nomor Purchase Order masih kosong
+         */
+        _isPROpen: function (item) {
+            return String(item.PurchaseOrder ?? "").trim() === "";
+        },
+
+        /**
+         * PO Open: sudah ada nomor Purchase Order, tetapi nomor GR Document masih kosong
+         */
+        _isPOOpen: function (item) {
+            return String(item.PurchaseOrder ?? "").trim() !== "" &&
+                String(item.GRDocument ?? "").trim() === "";
+        },
+
+        /**
+         * Filter matcher: Highlight tile (ALL | PR_OPEN | PO_OPEN)
+         */
+        _matchesHighlight: function (item, sHighlight) {
+            if (sHighlight === "PR_OPEN") {
+                return this._isPROpen(item);
+            }
+            if (sHighlight === "PO_OPEN") {
+                return this._isPOOpen(item);
+            }
+            return true;
+        },
+
+        /**
+         * Computes and writes highlight metrics to the view model.
+         * Counts are based on the filter bar result (before the highlight filter),
+         * so the tile numbers stay stable while switching between highlights:
          * - Total PR Document: total filtered records (default: current year)
-         * - Highlight PR Open: IsClosed tidak sama dengan X
-         * - Highlight PO Open: IsCompletelyDelivered tidak sama dengan X
+         * - Highlight PR Open: PurchaseOrder kosong
+         * - Highlight PO Open: PurchaseOrder terisi dan GRDocument kosong
          */
         _updateHighlightMetrics: function (oViewModel, aFiltered, sYear, bHasCustomDateRange, bHasMultipleFilters) {
-            let nTotalPR = 0;
             let nPROpen = 0;
             let nPOOpen = 0;
 
             aFiltered.forEach((item) => {
-                nTotalPR++;
-                // Highlight PR open jika IsClosed tidak sama dengan X
-                const sIsClosed = String(item.IsClosed ?? "").trim().toUpperCase();
-                if (sIsClosed !== "X") {
+                if (this._isPROpen(item)) {
                     nPROpen++;
                 }
-                // Highlight PO open jika PurchaseOrder tidak null/kosong dan IsCompletelyDelivered tidak sama dengan X
-                const sPO = String(item.PurchaseOrder ?? "").trim();
-                const sIsDelivered = String(item.IsCompletelyDelivered ?? "").trim().toUpperCase();
-                if (sPO !== "" && sIsDelivered !== "X") {
+                if (this._isPOOpen(item)) {
                     nPOOpen++;
                 }
             });
 
+            const nTotalPR = aFiltered.length;
             const sPeriodLabel = this._getPeriodLabel(bHasCustomDateRange, sYear, bHasMultipleFilters);
 
             oViewModel.setProperty("/kpiTotal", nTotalPR);
             oViewModel.setProperty("/kpiPROpen", nPROpen);
             oViewModel.setProperty("/kpiPOOpen", nPOOpen);
-            oViewModel.setProperty("/totalCount", nTotalPR);
 
             oViewModel.setProperty("/highlightTotalPR", nTotalPR);
             oViewModel.setProperty("/highlightPeriodLabel", sPeriodLabel);
@@ -448,8 +472,8 @@ sap.ui.define([
                 currency: sCurrency
             });
 
-            // Filter the dataset using all criteria
-            this._filteredRecords = this._allRecords.filter((item) =>
+            // Filter the dataset using all filter bar criteria
+            const aBaseRecords = this._allRecords.filter((item) =>
                 this._matchesYear(item, sYear, bHasCustomDateRange) &&
                 this._matchesPRDate(item, dPRFrom, dPRTo) &&
                 this._matchesSearch(item, sSearch) &&
@@ -460,14 +484,25 @@ sap.ui.define([
                 this._matchesCurrency(item, sCurrency)
             );
 
-            // Update highlight summary
+            // Update highlight summary (counts based on filter bar result)
             this._updateHighlightMetrics(
                 oViewModel,
-                this._filteredRecords,
+                aBaseRecords,
                 sYear,
                 bHasCustomDateRange,
                 aActiveFilterTexts.length > 1
             );
+
+            // Apply the selected highlight tile (PR Open / PO Open) on top of the filter bar result
+            const sHighlight = String(oViewModel.getProperty("/selectedHighlight") || "ALL");
+            this._filteredRecords = aBaseRecords.filter((item) => this._matchesHighlight(item, sHighlight));
+            oViewModel.setProperty("/totalCount", this._filteredRecords.length);
+
+            if (sHighlight === "PR_OPEN") {
+                aActiveFilterTexts.push("Highlight: PR Open (PO kosong)");
+            } else if (sHighlight === "PO_OPEN") {
+                aActiveFilterTexts.push("Highlight: PO Open (GR kosong)");
+            }
 
             const bHasActiveFilter = aActiveFilterTexts.length > 0;
             oViewModel.setProperty("/hasActiveFilter", bHasActiveFilter);
@@ -559,6 +594,7 @@ sap.ui.define([
                 oViewModel.setProperty("/selectedMaterial", "");
                 oViewModel.setProperty("/selectedStatus", "");
                 oViewModel.setProperty("/selectedCurrency", "");
+                oViewModel.setProperty("/selectedHighlight", "ALL");
             }
 
             this._applyFiltersAndPagination();
@@ -651,7 +687,9 @@ sap.ui.define([
         },
 
         /**
-         * KPI Tiles press feedback
+         * KPI Tiles press: filters the table by the selected highlight.
+         * - Total PR Document: show all (removes highlight filter)
+         * - PR Open / PO Open: show only matching rows; clicking the active tile again removes the filter
          */
         onKpiTilePress: function (oEvent) {
             const oTile = oEvent.getSource();
@@ -660,19 +698,27 @@ sap.ui.define([
             }
 
             const oFilterData = oTile.getCustomData().find((cd) => cd.getKey() === "filterKey");
-            const sKey = oFilterData ? oFilterData.getValue() : "ALL";
+            let sKey = oFilterData ? oFilterData.getValue() : "ALL";
 
             const oViewModel = this._getViewModel();
             if (!oViewModel) {
                 return;
             }
 
+            // Toggle: clicking the already active highlight returns to all data
+            if (sKey === oViewModel.getProperty("/selectedHighlight")) {
+                sKey = "ALL";
+            }
+            oViewModel.setProperty("/selectedHighlight", sKey);
+            this._applyFiltersAndPagination();
+
+            const nCount = this._filteredRecords.length;
             if (sKey === "PR_OPEN") {
-                MessageToast.show(`Highlight PR Open (IsClosed !== 'X'): ${String(oViewModel.getProperty("/kpiPROpen") || 0)} dokumen.`);
+                MessageToast.show(`Menampilkan ${nCount} PR Open (nomor PO masih kosong).`);
             } else if (sKey === "PO_OPEN") {
-                MessageToast.show(`Highlight PO Open (PO ada & IsCompletelyDelivered !== 'X'): ${String(oViewModel.getProperty("/kpiPOOpen") || 0)} dokumen.`);
+                MessageToast.show(`Menampilkan ${nCount} PO Open (nomor GR Document masih kosong).`);
             } else {
-                MessageToast.show(`Highlight Total PR Document: ${String(oViewModel.getProperty("/kpiTotal") || 0)} dokumen.`);
+                MessageToast.show(`Menampilkan semua ${nCount} PR Document.`);
             }
         },
 
