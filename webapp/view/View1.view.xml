@@ -1,0 +1,683 @@
+<mvc:View
+    controllerName="prpayment.projectprpayment.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout"
+    height="100%">
+
+    <f:DynamicPage
+        id="dynamicPageId"
+        headerExpanded="true"
+        preserveHeaderStateOnScroll="false"
+        showFooter="false"
+        fitContent="true">
+
+        <!-- Dynamic Page Title -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <HBox alignItems="Center">
+                        <Avatar
+                            displayShape="Square"
+                            displaySize="M"
+                            src="sap-icon://money-bills"
+                            backgroundColor="Accent6"
+                            class="sapUiSmallMarginEnd" />
+                        <VBox>
+                            <Title text="{i18n>appTitle}" level="H2" />
+                            <Label text="{i18n>appDescription}" />
+                        </VBox>
+                    </HBox>
+                </f:heading>
+                <f:actions>
+                    <Button
+                        text="{i18n>btnExportExcel}"
+                        icon="sap-icon://excel-attachment"
+                        type="Ghost"
+                        press=".onExportExcel" />
+                    <Button
+                        text="{i18n>btnRefresh}"
+                        icon="sap-icon://refresh"
+                        type="Transparent"
+                        press=".onRefresh" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        type="Transparent"
+                        tooltip="{i18n>btnViewSettings}"
+                        press=".onOpenViewSettings" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- Dynamic Page Header: Filter at the TOP, followed by Highlight Summary -->
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <f:content>
+                    <!-- 1. FILTER BAR (Diletakkan Paling Atas) -->
+                    <Panel
+                        expandable="true"
+                        expanded="true"
+                        headerText="{i18n>filterBarTitle}"
+                        class="sapUiNoContentPadding filterPanel sapUiSmallMarginBottom">
+                        <headerToolbar>
+                            <OverflowToolbar height="2.5rem">
+                                <core:Icon src="sap-icon://filter" />
+                                <Title text="{i18n>filterBarTitle}" level="H4"/>
+                                <ToolbarSpacer/>
+                                <Button
+                                    text="{i18n>btnReset}"
+                                    icon="sap-icon://clear-filter"
+                                    press=".onResetFilters"
+                                    type="Transparent" />
+                                <Button
+                                    text="{i18n>btnSearch}"
+                                    icon="sap-icon://search"
+                                    type="Emphasized"
+                                    press=".onApplyFilters" />
+                            </OverflowToolbar>
+                        </headerToolbar>
+
+                        <layout:Grid class="sapUiSmallMargin">
+                            <!-- Baris 1: Pencarian, Tahun, Rentang Tanggal PR, Plant -->
+                            <!-- 1.1 Pencarian Bebas -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblSearch}" labelFor="searchInput" />
+                                <SearchField
+                                    id="searchInput"
+                                    value="{viewModel>/searchQuery}"
+                                    placeholder="{i18n>searchPlaceholder}"
+                                    search=".onApplyFilters"
+                                    width="100%" />
+                            </VBox>
+
+                            <!-- 1.2 Tahun Transaksi (Daftar Tahun dari PR Date) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL2 L2 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblYear}" labelFor="yearSelect" />
+                                <Select
+                                    id="yearSelect"
+                                    selectedKey="{viewModel>/selectedYear}"
+                                    items="{viewModel>/yearList}"
+                                    change=".onApplyFilters"
+                                    width="100%">
+                                    <core:Item key="{viewModel>key}" text="{viewModel>text}" />
+                                </Select>
+                            </VBox>
+
+                            <!-- 1.3 PR Date (Rentang Tanggal Pembuatan PR) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL4 L4 M12 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblPRDate}" labelFor="prDateRange" />
+                                <DateRangeSelection
+                                    id="prDateRange"
+                                    dateValue="{viewModel>/prDateFrom}"
+                                    secondDateValue="{viewModel>/prDateTo}"
+                                    displayFormat="dd/MM/yyyy"
+                                    placeholder="{i18n>phPRDate}"
+                                    change=".onApplyFilters"
+                                    width="100%" />
+                            </VBox>
+
+                            <!-- 1.4 Plant (Daftar Plant dari Tabel) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblPlant}" labelFor="plantSelect" />
+                                <Select
+                                    id="plantSelect"
+                                    selectedKey="{viewModel>/selectedPlant}"
+                                    items="{viewModel>/plantList}"
+                                    change=".onApplyFilters"
+                                    width="100%">
+                                    <core:Item key="{viewModel>key}" text="{viewModel>text}" />
+                                </Select>
+                            </VBox>
+
+                            <!-- Baris 2: Purchasing Group, Material, Overall Status, Currency -->
+                            <!-- 2.1 Purchasing Group (Daftar Purchasing Group dari Tabel) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblPurchasingGroup}" labelFor="pGroupSelect" />
+                                <Select
+                                    id="pGroupSelect"
+                                    selectedKey="{viewModel>/selectedPurchasingGroup}"
+                                    items="{viewModel>/purchasingGroupList}"
+                                    change=".onApplyFilters"
+                                    width="100%">
+                                    <core:Item key="{viewModel>key}" text="{viewModel>text}" />
+                                </Select>
+                            </VBox>
+
+                            <!-- 2.2 Material -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblMaterial}" labelFor="materialInput" />
+                                <Input
+                                    id="materialInput"
+                                    value="{viewModel>/selectedMaterial}"
+                                    placeholder="{i18n>phMaterial}"
+                                    submit=".onApplyFilters"
+                                    width="100%" />
+                            </VBox>
+
+                            <!-- 2.3 Payment Status (Daftar Value Payment Status dari Tabel) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblPaymentStatus}" labelFor="statusSelect" />
+                                <Select
+                                    id="statusSelect"
+                                    selectedKey="{viewModel>/selectedStatus}"
+                                    items="{viewModel>/statusList}"
+                                    change=".onApplyFilters"
+                                    width="100%">
+                                    <core:Item key="{viewModel>key}" text="{viewModel>text}" />
+                                </Select>
+                            </VBox>
+
+                            <!-- 2.4 Currency (Daftar Currency dari Tabel) -->
+                            <VBox>
+                                <layoutData>
+                                    <layout:GridData span="XL3 L3 M6 S12" />
+                                </layoutData>
+                                <Label text="{i18n>lblCurrency}" labelFor="currencySelect" />
+                                <Select
+                                    id="currencySelect"
+                                    selectedKey="{viewModel>/selectedCurrency}"
+                                    items="{viewModel>/currencyList}"
+                                    change=".onApplyFilters"
+                                    width="100%">
+                                    <core:Item key="{viewModel>key}" text="{viewModel>text}" />
+                                </Select>
+                            </VBox>
+                        </layout:Grid>
+                    </Panel>
+
+                    <!-- 2. RINGKASAN HIGHLIGHT (TOTAL PR, PR OPEN, PO OPEN) -->
+                    <layout:Grid class="kpiGrid">
+                        <!-- 2.1 Total PR Document (Periode Berjalan / Dinamis Sesuai Filter) -->
+                        <GenericTile
+                            class="kpiTile sapUiTinyMargin"
+                            header="{i18n>kpiTotalDocs}"
+                            press=".onKpiTilePress"
+                            headerImage="sap-icon://documents">
+                            <layoutData>
+                                <layout:GridData span="XL4 L4 M4 S12" />
+                            </layoutData>
+                            <TileContent unit="Dokumen">
+                                <NumericContent
+                                    value="{viewModel>/kpiTotal}"
+                                    valueColor="Neutral"
+                                    icon="sap-icon://activity-items" />
+                            </TileContent>
+                            <customData>
+                                <core:CustomData key="filterKey" value="ALL" />
+                            </customData>
+                        </GenericTile>
+
+                        <!-- 2.2 PR Open (IsClosed !== 'X') -->
+                        <GenericTile
+                            class="kpiTile kpiTileCritical sapUiTinyMargin"
+                            header="{i18n>kpiPROpen}"
+                            press=".onKpiTilePress"
+                            headerImage="sap-icon://document">
+                            <layoutData>
+                                <layout:GridData span="XL4 L4 M4 S12" />
+                            </layoutData>
+                            <TileContent unit="Dokumen">
+                                <NumericContent
+                                    value="{viewModel>/kpiPROpen}"
+                                    valueColor="Critical"
+                                    icon="sap-icon://in-progress" />
+                            </TileContent>
+                            <customData>
+                                <core:CustomData key="filterKey" value="PR_OPEN" />
+                            </customData>
+                        </GenericTile>
+
+                        <!-- 2.3 PO Open (IsCompletelyDelivered !== 'X') -->
+                        <GenericTile
+                            class="kpiTile kpiTileCritical sapUiTinyMargin"
+                            header="{i18n>kpiPOOpen}"
+                            press=".onKpiTilePress"
+                            headerImage="sap-icon://cart">
+                            <layoutData>
+                                <layout:GridData span="XL4 L4 M4 S12" />
+                            </layoutData>
+                            <TileContent unit="Dokumen">
+                                <NumericContent
+                                    value="{viewModel>/kpiPOOpen}"
+                                    valueColor="Critical"
+                                    icon="sap-icon://shipping-status" />
+                            </TileContent>
+                            <customData>
+                                <core:CustomData key="filterKey" value="PO_OPEN" />
+                            </customData>
+                        </GenericTile>
+                    </layout:Grid>
+                </f:content>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <!-- Dynamic Page Content (Report Table with all 25 CDS Columns + Pagination) -->
+        <f:content>
+            <VBox class="sapUiNoContentPadding">
+                <!-- Horizontal Scroll Container for 25 Columns -->
+                <ScrollContainer
+                    width="100%"
+                    horizontal="true"
+                    vertical="false"
+                    class="reportTableScrollContainer">
+                    <Table
+                        id="prPaymentTable"
+                        width="3160px"
+                        fixedLayout="false"
+                        inset="false"
+                        sticky="HeaderToolbar,InfoToolbar,ColumnHeaders"
+                        noDataText="{i18n>noDataText}"
+                        items="{tableModel>/displayedItems}"
+                        class="reportTable sapUiResponsiveMargin">
+
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title
+                                    text="{i18n>tableTitle}"
+                                    level="H3" />
+                                <ObjectStatus
+                                    class="sapUiTinyMarginBegin"
+                                    text="{viewModel>/totalCount} Total ({viewModel>/pageSize} Data / Layar)"
+                                    state="Information" />
+                                <ToolbarSpacer />
+                                <SearchField
+                                    placeholder="Pencarian cepat tabel..."
+                                    width="250px"
+                                    liveChange=".onLiveSearchTable" />
+                                <Button
+                                    icon="sap-icon://sort"
+                                    tooltip="{i18n>btnViewSettings}"
+                                    press=".onOpenViewSettings" />
+                                <Button
+                                    icon="sap-icon://excel-attachment"
+                                    tooltip="{i18n>btnExportExcel}"
+                                    press=".onExportExcel" />
+                            </OverflowToolbar>
+                        </headerToolbar>
+
+                        <infoToolbar>
+                            <OverflowToolbar
+                                id="activeFilterToolbar"
+                                visible="{viewModel>/hasActiveFilter}"
+                                active="true"
+                                press=".onResetFilters">
+                                <Label text="{viewModel>/activeFilterText}" />
+                                <ToolbarSpacer/>
+                                <core:Icon src="sap-icon://decline" tooltip="Reset ke Default Tahun Berjalan" />
+                            </OverflowToolbar>
+                        </infoToolbar>
+
+                        <!-- Columns: Column 0 (Row Number) + 25 CDS Columns + Aksi Column (Paling Kanan) -->
+                        <columns>
+                            <!-- 0. Row Number (No.) -->
+                            <Column width="65px" hAlign="Center">
+                                <Text text="{i18n>colRowNum}" />
+                            </Column>
+
+                            <!-- 1. PurchaseRequisition -->
+                            <Column width="130px">
+                                <Text text="{i18n>colPR}" tooltip="Purchase Requisition Number" />
+                            </Column>
+
+                            <!-- 2. PurchaseRequisitionItem -->
+                            <Column width="85px" hAlign="Center">
+                                <Text text="{i18n>colPRItem}" tooltip="Item number of purchase requisition" />
+                            </Column>
+
+                            <!-- 3. PurchaseReqnCreationDate -->
+                            <Column width="125px" hAlign="Center">
+                                <Text text="{i18n>colPRDate}" tooltip="Purchasing Document Creation Date" />
+                            </Column>
+
+                            <!-- 4. Material -->
+                            <Column width="150px">
+                                <Text text="{i18n>colMaterial}" tooltip="Material Number" />
+                            </Column>
+
+                            <!-- 5. PurchaseRequisitionItemText -->
+                            <Column width="240px">
+                                <Text text="{i18n>colMaterialDesc}" tooltip="Short Text" />
+                            </Column>
+
+                            <!-- 6. Plant -->
+                            <Column width="85px" hAlign="Center">
+                                <Text text="{i18n>colPlant}" tooltip="Plant" />
+                            </Column>
+
+                            <!-- 7. PurchasingGroup -->
+                            <Column width="100px" hAlign="Center">
+                                <Text text="{i18n>colPurchasingGroup}" tooltip="Purchasing Group" />
+                            </Column>
+
+                            <!-- 8. PRQuantity -->
+                            <Column width="120px" hAlign="End">
+                                <Text text="{i18n>colPRQty}" tooltip="Purchase requisition quantity" />
+                            </Column>
+
+                            <!-- 9. PRUnit -->
+                            <Column width="85px" hAlign="Center">
+                                <Text text="{i18n>colPRUnit}" tooltip="Purchase requisition unit of measure" />
+                            </Column>
+
+                            <!-- 10. PurchaseRequisitionPrice -->
+                            <Column width="140px" hAlign="End">
+                                <Text text="{i18n>colPRPrice}" tooltip="Price in Purchase Requisition" />
+                            </Column>
+
+                            <!-- 11. PurReqnItemCurrency -->
+                            <Column width="95px" hAlign="Center">
+                                <Text text="{i18n>colPRCurrency}" tooltip="Currency Key" />
+                            </Column>
+
+                            <!-- 12. PurchaseOrder -->
+                            <Column width="135px">
+                                <Text text="{i18n>colPO}" tooltip="Purchase Order Number" />
+                            </Column>
+
+                            <!-- 13. POQuantity -->
+                            <Column width="120px" hAlign="End">
+                                <Text text="{i18n>colPOQty}" tooltip="Purchase Order Quantity" />
+                            </Column>
+
+                            <!-- 14. POUnit -->
+                            <Column width="85px" hAlign="Center">
+                                <Text text="{i18n>colPOUnit}" tooltip="Purchase Order Unit of Measure" />
+                            </Column>
+
+                            <!-- 15. NetAmount -->
+                            <Column width="145px" hAlign="End">
+                                <Text text="{i18n>colNetVal}" tooltip="Net Order Value in PO Currency" />
+                            </Column>
+
+                            <!-- 16. DocumentCurrency -->
+                            <Column width="95px" hAlign="Center">
+                                <Text text="{i18n>colPOCurrency}" tooltip="PO Currency Key" />
+                            </Column>
+
+                            <!-- 17. GRDocument -->
+                            <Column width="135px">
+                                <Text text="{i18n>colGR}" tooltip="Number of Material Document (GR)" />
+                            </Column>
+
+                            <!-- 18. GRQuantity -->
+                            <Column width="120px" hAlign="End">
+                                <Text text="{i18n>colGRQty}" tooltip="GR Quantity" />
+                            </Column>
+
+                            <!-- 19. GRUnit -->
+                            <Column width="85px" hAlign="Center">
+                                <Text text="{i18n>colGRUnit}" tooltip="GR Unit of Measure" />
+                            </Column>
+
+                            <!-- 20. IRDocument -->
+                            <Column width="135px">
+                                <Text text="{i18n>colIR}" tooltip="Number of Material Document (IR)" />
+                            </Column>
+
+                            <!-- 21. PurchaseOrderAmount -->
+                            <Column width="145px" hAlign="End">
+                                <Text text="{i18n>colPOAmount}" tooltip="Amount in Document Currency (IR)" />
+                            </Column>
+
+                            <!-- 22. Currency -->
+                            <Column width="95px" hAlign="Center">
+                                <Text text="{i18n>colCurrency}" tooltip="IR Currency Key" />
+                            </Column>
+
+                            <!-- 23. PostingDate -->
+                            <Column width="125px" hAlign="Center">
+                                <Text text="{i18n>colPostingDate}" tooltip="Posting Date in the Document" />
+                            </Column>
+
+                            <!-- 24. PaymentStatus -->
+                            <Column width="140px" hAlign="Center">
+                                <Text text="{i18n>colStatus}" tooltip="Payment Status" />
+                            </Column>
+
+                            <!-- 25. DayOpen -->
+                            <Column width="115px" hAlign="Center">
+                                <Text text="{i18n>colAging}" tooltip="Day Open" />
+                            </Column>
+
+                            <!-- 26. Detail Column (Paling Kanan) -->
+                            <Column width="110px" hAlign="Center">
+                                <Text text="Detail" tooltip="Navigasi ke Detail Purchase Requisition" />
+                            </Column>
+                        </columns>
+
+                        <!-- Row Template: 0 (No.) + 25 CDS Cells + Aksi Button (Paling Kanan) -->
+                        <items>
+                            <ColumnListItem
+                                type="Navigation"
+                                press=".onNavToDetail">
+                                <cells>
+                                    <!-- 0. Row Number -->
+                                    <Text text="{tableModel>rowNumber}" />
+
+                                    <!-- 1. PurchaseRequisition -->
+                                    <ObjectIdentifier
+                                        title="{tableModel>PurchaseRequisition}" />
+
+                                    <!-- 2. PurchaseRequisitionItem -->
+                                    <Text text="{tableModel>PurchaseRequisitionItem}" />
+
+                                    <!-- 3. PurchaseReqnCreationDate -->
+                                    <Text text="{
+                                        path: 'tableModel>PurchaseReqnCreationDate',
+                                        formatter: '.formatter.formatDate'
+                                    }" />
+
+                                    <!-- 4. Material -->
+                                    <Text text="{tableModel>Material}" />
+
+                                    <!-- 5. PurchaseRequisitionItemText -->
+                                    <Text text="{tableModel>PurchaseRequisitionItemText}" />
+
+                                    <!-- 6. Plant -->
+                                    <Text text="{tableModel>Plant}" />
+
+                                    <!-- 7. PurchasingGroup -->
+                                    <Text text="{tableModel>PurchasingGroup}" />
+
+                                    <!-- 8. PRQuantity -->
+                                    <Text text="{
+                                        path: 'tableModel>PRQuantity',
+                                        formatter: '.formatter.formatQuantity'
+                                    }" />
+
+                                    <!-- 9. PRUnit -->
+                                    <Text text="{tableModel>PRUnit}" />
+
+                                    <!-- 10. PurchaseRequisitionPrice -->
+                                    <Text text="{
+                                        path: 'tableModel>PurchaseRequisitionPrice',
+                                        formatter: '.formatter.formatCurrency'
+                                    }" />
+
+                                    <!-- 11. PurReqnItemCurrency -->
+                                    <Text text="{tableModel>PurReqnItemCurrency}" />
+
+                                    <!-- 12. PurchaseOrder -->
+                                    <Text text="{= ${tableModel>PurchaseOrder} ? ${tableModel>PurchaseOrder} : '-' }" />
+
+                                    <!-- 13. POQuantity -->
+                                    <Text text="{
+                                        path: 'tableModel>POQuantity',
+                                        formatter: '.formatter.formatQuantity'
+                                    }" />
+
+                                    <!-- 14. POUnit -->
+                                    <Text text="{= ${tableModel>PurchaseOrder} ? ${tableModel>POUnit} : '-' }" />
+
+                                    <!-- 15. NetAmount -->
+                                    <ObjectNumber
+                                        number="{
+                                            path: 'tableModel>NetAmount',
+                                            formatter: '.formatter.formatCurrency'
+                                        }"
+                                        state="{= Number(${tableModel>NetAmount}) > 0 ? 'Success' : 'None' }" />
+
+                                    <!-- 16. DocumentCurrency -->
+                                    <Text text="{= ${tableModel>PurchaseOrder} ? ${tableModel>DocumentCurrency} : '-' }" />
+
+                                    <!-- 17. GRDocument -->
+                                    <Text text="{= ${tableModel>GRDocument} ? ${tableModel>GRDocument} : '-' }" />
+
+                                    <!-- 18. GRQuantity -->
+                                    <Text text="{
+                                        path: 'tableModel>GRQuantity',
+                                        formatter: '.formatter.formatQuantity'
+                                    }" />
+
+                                    <!-- 19. GRUnit -->
+                                    <Text text="{= ${tableModel>GRDocument} ? ${tableModel>GRUnit} : '-' }" />
+
+                                    <!-- 20. IRDocument -->
+                                    <Text text="{= ${tableModel>IRDocument} ? ${tableModel>IRDocument} : '-' }" />
+
+                                    <!-- 21. PurchaseOrderAmount -->
+                                    <ObjectNumber
+                                        number="{
+                                            path: 'tableModel>PurchaseOrderAmount',
+                                            formatter: '.formatter.formatCurrency'
+                                        }" />
+
+                                    <!-- 22. Currency -->
+                                    <Text text="{= ${tableModel>IRDocument} ? ${tableModel>Currency} : '-' }" />
+
+                                    <!-- 23. PostingDate -->
+                                    <Text text="{
+                                        path: 'tableModel>PostingDate',
+                                        formatter: '.formatter.formatDate'
+                                    }" />
+
+                                    <!-- 24. PaymentStatus -->
+                                    <ObjectStatus
+                                        text="{tableModel>PaymentStatus}"
+                                        state="{
+                                            path: 'tableModel>PaymentStatus',
+                                            formatter: '.formatter.statusState'
+                                        }"
+                                        icon="{
+                                            path: 'tableModel>PaymentStatus',
+                                            formatter: '.formatter.statusIcon'
+                                        }" />
+
+                                    <!-- 25. DayOpen -->
+                                    <ObjectStatus
+                                        text="{tableModel>DayOpen} Hari"
+                                        state="{
+                                            path: 'tableModel>DayOpen',
+                                            formatter: '.formatter.dayOpenState'
+                                        }" />
+
+                                    <!-- 26. Action Button Navigasi Detail PR (Paling Kanan) -->
+                                    <Button
+                                        text="Detail"
+                                        icon="sap-icon://navigation-right-arrow"
+                                        iconFirst="false"
+                                        type="Emphasized"
+                                        tooltip="Buka Detail PR {tableModel>PurchaseRequisition} (Item {tableModel>PurchaseRequisitionItem})"
+                                        press=".onNavToDetail" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </ScrollContainer>
+
+                <!-- Explicit Pagination Bar (Previous, Next, Page Numbers, Page Info) -->
+                <OverflowToolbar class="sapUiTinyMarginTop sapUiSmallMarginBottom paginationToolbar">
+                    <!-- Left: Range Info -->
+                    <Text
+                        text="Menampilkan data {viewModel>/pageStart} - {viewModel>/pageEnd} dari {viewModel>/totalCount} dokumen (Halaman {viewModel>/currentPage} dari {viewModel>/totalPages})"
+                        class="sapUiSmallMarginBegin" />
+
+                    <ToolbarSpacer />
+
+                    <!-- Center: Navigation Controls & Page Numbering -->
+                    <Button
+                        text="{i18n>btnFirst}"
+                        icon="sap-icon://collapse-group"
+                        tooltip="Halaman Pertama"
+                        enabled="{viewModel>/hasPrev}"
+                        press=".onFirstPage"
+                        type="Transparent" />
+
+                    <Button
+                        text="{i18n>btnPrev}"
+                        icon="sap-icon://navigation-left-arrow"
+                        tooltip="Halaman Sebelumnya"
+                        enabled="{viewModel>/hasPrev}"
+                        press=".onPrevPage"
+                        type="Default" />
+
+                    <!-- Dynamic Numbered Page Buttons [1] [2] [3]... -->
+                    <HBox items="{viewModel>/pageButtons}" alignItems="Center">
+                        <Button
+                            text="{viewModel>page}"
+                            type="{= ${viewModel>active} ? 'Emphasized' : 'Transparent' }"
+                            press=".onJumpToPage"
+                            class="pageNumberBtn sapUiTinyMarginBeginEnd"
+                            width="40px" />
+                    </HBox>
+
+                    <Button
+                        text="{i18n>btnNext}"
+                        iconFirst="false"
+                        icon="sap-icon://navigation-right-arrow"
+                        tooltip="Halaman Selanjutnya"
+                        enabled="{viewModel>/hasNext}"
+                        press=".onNextPage"
+                        type="Default" />
+
+                    <Button
+                        text="{i18n>btnLast}"
+                        iconFirst="false"
+                        icon="sap-icon://open-command-field"
+                        tooltip="Halaman Terakhir"
+                        enabled="{viewModel>/hasNext}"
+                        press=".onLastPage"
+                        type="Transparent" />
+
+                    <ToolbarSpacer />
+
+                    <!-- Right: Rows per page selector -->
+                    <Label text="{i18n>lblRowsPerPage}" class="sapUiTinyMarginEnd" />
+                    <Select
+                        id="pageSizeSelect"
+                        selectedKey="{viewModel>/pageSize}"
+                        change=".onChangePageSize"
+                        width="110px"
+                        class="sapUiSmallMarginEnd">
+                        <core:Item key="25" text="25 / Hal" />
+                        <core:Item key="50" text="50 / Hal" />
+                        <core:Item key="100" text="100 / Hal" />
+                    </Select>
+                </OverflowToolbar>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

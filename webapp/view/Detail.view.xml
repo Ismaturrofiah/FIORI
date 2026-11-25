@@ -1,0 +1,528 @@
+<mvc:View
+    controllerName="prpayment.projectprpayment.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    height="100%">
+
+    <f:DynamicPage
+        id="detailDynamicPage"
+        headerExpanded="true"
+        preserveHeaderStateOnScroll="false"
+        showFooter="false"
+        fitContent="true"
+        busy="{detailViewModel>/busy}"
+        busyIndicatorDelay="0">
+
+        <!-- Dynamic Page Title: Breadcrumb, PR Title, Payment Status, Action Buttons -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:breadcrumbs>
+                    <Breadcrumbs currentLocationText="Detail PR: {detailViewModel>/prNumber} (Item {detailViewModel>/prItem})">
+                        <Link
+                            text="{i18n>appTitle}"
+                            press=".onNavBack" />
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+
+                <f:heading>
+                    <HBox alignItems="Center">
+                        <Button
+                            icon="sap-icon://nav-back"
+                            type="Transparent"
+                            press=".onNavBack"
+                            tooltip="Kembali ke Daftar Transaksi"
+                            class="sapUiTinyMarginEnd" />
+                        <Avatar
+                            displayShape="Square"
+                            displaySize="M"
+                            src="sap-icon://request"
+                            backgroundColor="Accent6"
+                            class="sapUiSmallMarginEnd" />
+                        <VBox>
+                            <HBox alignItems="Center">
+                                <Title
+                                    text="{= 'Purchase Requisition ' + (${detailModel>/PurchaseRequisition} || ${detailViewModel>/prNumber}) }"
+                                    level="H2"
+                                    class="sapUiTinyMarginEnd" />
+                                <ObjectStatus
+                                    text="{detailModel>/PaymentStatus}"
+                                    state="{
+                                        path: 'detailModel>/PaymentStatus',
+                                        formatter: '.formatter.statusState'
+                                    }"
+                                    icon="{
+                                        path: 'detailModel>/PaymentStatus',
+                                        formatter: '.formatter.statusIcon'
+                                    }"
+                                    inverted="true" />
+                            </HBox>
+                            <Label
+                                text="{= 'Item: ' + (${detailModel>/PurchaseRequisitionItem} || ${detailViewModel>/prItem}) + (${detailModel>/Material} ? (' | Material: ' + ${detailModel>/Material} + ' - ' + ${detailModel>/PurchaseRequisitionItemText}) : '') }"
+                                design="Bold" />
+                        </VBox>
+                    </HBox>
+                </f:heading>
+
+                <f:actions>
+                    <Button
+                        text="{i18n>btnRefresh}"
+                        icon="sap-icon://refresh"
+                        type="Transparent"
+                        press=".onRefresh" />
+                    <Button
+                        text="Kembali"
+                        icon="sap-icon://nav-back"
+                        type="Emphasized"
+                        press=".onNavBack" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- Dynamic Page Header: Highlight KPI Cards -->
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <f:content>
+                    <layout:Grid class="kpiGrid">
+                        <!-- KPI 1: Tanggal Pembuatan PR -->
+                        <GenericTile
+                            class="kpiTile sapUiTinyMargin"
+                            header="Tanggal PR"
+                            headerImage="sap-icon://calendar">
+                            <layoutData>
+                                <layout:GridData span="XL3 L3 M6 S12" />
+                            </layoutData>
+                            <TileContent unit="Tgl Dokumen">
+                                <NumericContent
+                                    icon="sap-icon://calendar"
+                                    value="{
+                                        path: 'detailModel>/PurchaseReqnCreationDate',
+                                        formatter: '.formatter.formatDate'
+                                    }"
+                                    valueColor="Neutral" />
+                            </TileContent>
+                        </GenericTile>
+
+                        <!-- KPI 2: Kuantitas Diajukan -->
+                        <GenericTile
+                            class="kpiTile sapUiTinyMargin"
+                            header="Kuantitas PR"
+                            headerImage="sap-icon://product">
+                            <layoutData>
+                                <layout:GridData span="XL3 L3 M6 S12" />
+                            </layoutData>
+                            <TileContent unit="{detailModel>/PRUnit}">
+                                <NumericContent
+                                    value="{
+                                        path: 'detailModel>/PRQuantity',
+                                        formatter: '.formatter.formatQuantity'
+                                    }"
+                                    valueColor="Neutral" />
+                            </TileContent>
+                        </GenericTile>
+
+                        <!-- KPI 3: Nilai Valuasi PR -->
+                        <GenericTile
+                            class="kpiTile sapUiTinyMargin"
+                            header="Harga Valuasi PR"
+                            headerImage="sap-icon://lead">
+                            <layoutData>
+                                <layout:GridData span="XL3 L3 M6 S12" />
+                            </layoutData>
+                            <TileContent unit="{detailModel>/PurReqnItemCurrency}">
+                                <NumericContent
+                                    value="{
+                                        path: 'detailModel>/PurchaseRequisitionPrice',
+                                        formatter: '.formatter.formatCurrency'
+                                    }"
+                                    valueColor="Good" />
+                            </TileContent>
+                        </GenericTile>
+
+                        <!-- KPI 4: Hari Terbuka (Day Open) -->
+                        <GenericTile
+                            class="kpiTile sapUiTinyMargin"
+                            header="Aging / Hari Terbuka"
+                            headerImage="sap-icon://history">
+                            <layoutData>
+                                <layout:GridData span="XL3 L3 M6 S12" />
+                            </layoutData>
+                            <TileContent unit="Hari">
+                                <NumericContent
+                                    value="{detailModel>/DayOpen}"
+                                    valueColor="{= Number(${detailModel>/DayOpen}) > 30 ? 'Critical' : 'Good' }" />
+                            </TileContent>
+                        </GenericTile>
+                    </layout:Grid>
+                </f:content>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <!-- Dynamic Page Content: Structured PR & Lifecycle Details -->
+        <f:content>
+            <VBox class="sapUiNoContentPadding sapUiSmallMargin">
+                <!-- Alert if error loading data -->
+                <MessageStrip
+                    text="{detailViewModel>/errorMessage}"
+                    type="Error"
+                    showIcon="true"
+                    visible="{detailViewModel>/hasError}"
+                    class="sapUiSmallMarginBottom" />
+
+                <!-- CDS Parameter Status Info Bar -->
+                <MessageStrip
+                    text="Sumber Data: CDS View Z_PRDETAIL_CDS | Parameter: {detailViewModel>/cdsParamString} | Service: {detailViewModel>/cdsServiceUri}"
+                    type="Information"
+                    showIcon="true"
+                    class="sapUiSmallMarginBottom" />
+
+                <!-- Milestone Transaksi Siklus PR to Payment -->
+                <Panel
+                    expandable="false"
+                    headerText="Siklus Dokumen Transaksi (Procure to Pay)"
+                    class="sapUiSmallMarginBottom">
+                    <HBox
+                        alignItems="Center"
+                        justifyContent="SpaceAround"
+                        class="sapUiSmallMarginTopBottom sapUiSmallMarginBeginEnd"
+                        wrap="Wrap">
+                        <!-- Step 1: PR -->
+                        <HBox alignItems="Center" class="sapUiTinyMargin">
+                            <core:Icon
+                                src="sap-icon://request"
+                                size="1.5rem"
+                                color="#0a6ed1"
+                                class="sapUiTinyMarginEnd" />
+                            <VBox>
+                                <Text text="1. PR Diajukan" class="sapUiTinyMarginBottom boldText" />
+                                <ObjectStatus
+                                    text="{detailModel>/PurchaseRequisition} ({detailModel>/PurchaseRequisitionItem})"
+                                    state="Success" />
+                            </VBox>
+                        </HBox>
+
+                        <core:Icon src="sap-icon://navigation-right-arrow" class="sapUiTinyMarginBeginEnd" />
+
+                        <!-- Step 2: PO -->
+                        <HBox alignItems="Center" class="sapUiTinyMargin">
+                            <core:Icon
+                                src="sap-icon://cart"
+                                size="1.5rem"
+                                color="{= ${detailModel>/PurchaseOrder} ? '#e9730c' : '#8c8c8c' }"
+                                class="sapUiTinyMarginEnd" />
+                            <VBox>
+                                <Text text="2. Purchase Order" class="sapUiTinyMarginBottom boldText" />
+                                <ObjectStatus
+                                    text="{= ${detailModel>/PurchaseOrder} ? ${detailModel>/PurchaseOrder} : 'Belum Ada PO' }"
+                                    state="{= ${detailModel>/PurchaseOrder} ? 'Success' : 'None' }" />
+                            </VBox>
+                        </HBox>
+
+                        <core:Icon src="sap-icon://navigation-right-arrow" class="sapUiTinyMarginBeginEnd" />
+
+                        <!-- Step 3: GR -->
+                        <HBox alignItems="Center" class="sapUiTinyMargin">
+                            <core:Icon
+                                src="sap-icon://shipping-status"
+                                size="1.5rem"
+                                color="{= ${detailModel>/GRDocument} ? '#2b7c2b' : '#8c8c8c' }"
+                                class="sapUiTinyMarginEnd" />
+                            <VBox>
+                                <Text text="3. Goods Receipt (GR)" class="sapUiTinyMarginBottom boldText" />
+                                <ObjectStatus
+                                    text="{= ${detailModel>/GRDocument} ? ${detailModel>/GRDocument} : 'Belum Ada GR' }"
+                                    state="{= ${detailModel>/GRDocument} ? 'Success' : 'None' }" />
+                            </VBox>
+                        </HBox>
+
+                        <core:Icon src="sap-icon://navigation-right-arrow" class="sapUiTinyMarginBeginEnd" />
+
+                        <!-- Step 4: IR -->
+                        <HBox alignItems="Center" class="sapUiTinyMargin">
+                            <core:Icon
+                                src="sap-icon://receipt"
+                                size="1.5rem"
+                                color="{= ${detailModel>/IRDocument} ? '#107e3e' : '#8c8c8c' }"
+                                class="sapUiTinyMarginEnd" />
+                            <VBox>
+                                <Text text="4. Invoice (IR)" class="sapUiTinyMarginBottom boldText" />
+                                <ObjectStatus
+                                    text="{= ${detailModel>/IRDocument} ? ${detailModel>/IRDocument} : 'Belum Ada Tagihan' }"
+                                    state="{= ${detailModel>/IRDocument} ? 'Success' : 'None' }" />
+                            </VBox>
+                        </HBox>
+
+                        <core:Icon src="sap-icon://navigation-right-arrow" class="sapUiTinyMarginBeginEnd" />
+
+                        <!-- Step 5: Payment -->
+                        <HBox alignItems="Center" class="sapUiTinyMargin">
+                            <core:Icon
+                                src="sap-icon://money-bills"
+                                size="1.5rem"
+                                color="#0a6ed1"
+                                class="sapUiTinyMarginEnd" />
+                            <VBox>
+                                <Text text="5. Status Pembayaran" class="sapUiTinyMarginBottom boldText" />
+                                <ObjectStatus
+                                    text="{detailModel>/PaymentStatus}"
+                                    state="{
+                                        path: 'detailModel>/PaymentStatus',
+                                        formatter: '.formatter.statusState'
+                                    }" />
+                            </VBox>
+                        </HBox>
+                    </HBox>
+                </Panel>
+
+                <!-- Section 1: Detail Purchase Requisition (CDS Z_PRDETAIL_CDS Data) -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionPR}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://request" color="#0a6ed1" />
+                            <Title text="{i18n>sectionPR} (Data CDS Z_PRDETAIL_CDS)" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="PR: {detailModel>/PurchaseRequisition} / Item: {detailModel>/PurchaseRequisitionItem}"
+                                state="Information"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <form:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <form:content>
+                            <core:Title text="Informasi Dokumen PR &amp; Parameter CDS" />
+                            <Label text="{i18n>lblPRNum}"/>
+                            <Text text="{detailModel>/PurchaseRequisition}" />
+
+                            <Label text="{i18n>lblPRItem}"/>
+                            <Text text="{detailModel>/PurchaseRequisitionItem}" />
+
+                            <Label text="Parameter CDS (p_banfn)"/>
+                            <Text text="{detailViewModel>/prNumber}" />
+
+                            <Label text="Parameter CDS (p_bnfpo)"/>
+                            <Text text="{detailViewModel>/prItem}" />
+
+                            <Label text="{i18n>lblPRDateVal}"/>
+                            <Text text="{
+                                path: 'detailModel>/PurchaseReqnCreationDate',
+                                formatter: '.formatter.formatDate'
+                            }" />
+
+                            <Label text="{i18n>lblPlantVal}"/>
+                            <Text text="{detailModel>/Plant}" />
+
+                            <Label text="{i18n>lblPurchasingGroupVal}"/>
+                            <Text text="{detailModel>/PurchasingGroup}" />
+
+                            <Label text="Status PR Ditutup (IsClosed)"/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/IsClosed} === 'X' ? 'Ya (Closed)' : 'Tidak (Open)' }"
+                                state="{= ${detailModel>/IsClosed} === 'X' ? 'None' : 'Critical' }" />
+
+                            <core:Title text="Detail Material &amp; Valuasi Harga" />
+                            <Label text="{i18n>lblMaterialCode}"/>
+                            <Text text="{detailModel>/Material}" />
+
+                            <Label text="{i18n>lblMaterialDesc}"/>
+                            <Text text="{detailModel>/PurchaseRequisitionItemText}" />
+
+                            <Label text="{i18n>lblPRQty}"/>
+                            <Text text="{
+                                path: 'detailModel>/PRQuantity',
+                                formatter: '.formatter.formatQuantity'
+                            } {detailModel>/PRUnit}" />
+
+                            <Label text="{i18n>lblPRPrice}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/PurchaseRequisitionPrice',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/PurReqnItemCurrency}" />
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+
+                <!-- Section 2: Purchase Order (PO) -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionPO}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://cart" color="#e9730c" />
+                            <Title text="{i18n>sectionPO}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/PurchaseOrder} ? ('No. PO: ' + ${detailModel>/PurchaseOrder}) : 'Belum Terbit PO' }"
+                                state="{= ${detailModel>/PurchaseOrder} ? 'Success' : 'Warning' }"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <form:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <form:content>
+                            <core:Title text="Informasi Pemesanan (Purchase Order)" />
+                            <Label text="{i18n>lblPONum}"/>
+                            <Text text="{= ${detailModel>/PurchaseOrder} ? ${detailModel>/PurchaseOrder} : '-' }" />
+
+                            <Label text="{i18n>lblPOQty}"/>
+                            <Text text="{= ${detailModel>/PurchaseOrder} ? (${detailModel>/POQuantity} + ' ' + ${detailModel>/POUnit}) : '-' }" />
+
+                            <core:Title text="Valuasi PO" />
+                            <Label text="{i18n>lblPONetAmount}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/NetAmount',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/DocumentCurrency}"
+                                state="Success" />
+
+                            <Label text="Pengiriman Lengkap"/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/IsCompletelyDelivered} === 'X' ? 'Lengkap (Delivered)' : 'Belum Lengkap' }"
+                                state="{= ${detailModel>/IsCompletelyDelivered} === 'X' ? 'Success' : 'Critical' }" />
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+
+                <!-- Section 3: Goods Receipt (GR) -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionGR}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://shipping-status" color="#2b7c2b" />
+                            <Title text="{i18n>sectionGR}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/GRDocument} ? ('No. GR: ' + ${detailModel>/GRDocument}) : 'Belum Ada Penerimaan Barang' }"
+                                state="{= ${detailModel>/GRDocument} ? 'Success' : 'None' }"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <form:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <form:content>
+                            <core:Title text="Dokumen Penerimaan Barang (GR)" />
+                            <Label text="{i18n>lblGRDoc}"/>
+                            <Text text="{= ${detailModel>/GRDocument} ? ${detailModel>/GRDocument} : '-' }" />
+
+                            <core:Title text="Kuantitas Diterima" />
+                            <Label text="{i18n>lblGRQty}"/>
+                            <Text text="{= ${detailModel>/GRDocument} ? (${detailModel>/GRQuantity} + ' ' + ${detailModel>/GRUnit}) : '-' }" />
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+
+                <!-- Section 4: Invoice Receipt & Payment Status -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionIR}">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://receipt" color="#107e3e" />
+                            <Title text="{i18n>sectionIR}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{detailModel>/PaymentStatus}"
+                                state="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusState'
+                                }"
+                                icon="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusIcon'
+                                }" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <form:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <form:content>
+                            <core:Title text="Verifikasi Tagihan (Invoice)" />
+                            <Label text="{i18n>lblIRDoc}"/>
+                            <Text text="{= ${detailModel>/IRDocument} ? ${detailModel>/IRDocument} : '-' }" />
+
+                            <Label text="{i18n>lblPOAmount}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/PurchaseOrderAmount',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/Currency}" />
+
+                            <Label text="{i18n>lblPostingDateVal}"/>
+                            <Text text="{
+                                path: 'detailModel>/PostingDate',
+                                formatter: '.formatter.formatDate'
+                            }" />
+
+                            <core:Title text="Status Pembayaran &amp; Hari Terbuka (Aging)" />
+                            <Label text="{i18n>lblPaymentStatusVal}"/>
+                            <ObjectStatus
+                                text="{detailModel>/PaymentStatus}"
+                                state="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusState'
+                                }"
+                                icon="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusIcon'
+                                }" />
+
+                            <Label text="{i18n>lblDayOpenVal}"/>
+                            <ObjectStatus
+                                text="{detailModel>/DayOpen} Hari"
+                                state="{
+                                    path: 'detailModel>/DayOpen',
+                                    formatter: '.formatter.dayOpenState'
+                                }" />
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

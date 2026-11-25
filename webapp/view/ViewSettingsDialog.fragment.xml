@@ -1,0 +1,21 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <ViewSettingsDialog
+        id="viewSettingsDialog"
+        confirm=".onConfirmViewSettings">
+        <sortItems>
+            <ViewSettingsItem text="{i18n>sortPR}" key="PurchaseRequisition" selected="true" />
+            <ViewSettingsItem text="{i18n>sortPRDate}" key="PurchaseReqnCreationDate" />
+            <ViewSettingsItem text="{i18n>sortPO}" key="PurchaseOrder" />
+            <ViewSettingsItem text="{i18n>sortAmount}" key="NetAmount" />
+            <ViewSettingsItem text="{i18n>sortPostingDate}" key="PostingDate" />
+            <ViewSettingsItem text="{i18n>sortAging}" key="DayOpen" />
+        </sortItems>
+        <groupItems>
+            <ViewSettingsItem text="{i18n>groupPlant}" key="Plant" />
+            <ViewSettingsItem text="{i18n>groupPurchasingGroup}" key="PurchasingGroup" />
+            <ViewSettingsItem text="{i18n>groupStatus}" key="PaymentStatus" />
+        </groupItems>
+    </ViewSettingsDialog>
+</core:FragmentDefinition>

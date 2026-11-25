@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema Namespace="Z_PRDETAIL_CDS" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <EntityType Name="Z_PRDETAIL_CDSParameters" sap:semantics="parameters" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="p_banfn"/>
+                    <PropertyRef Name="p_bnfpo"/>
+                </Key>
+                <Property Name="p_banfn" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Purchase Requisition" sap:parameter="mandatory"/>
+                <Property Name="p_bnfpo" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Requisn. item" sap:parameter="mandatory"/>
+                <NavigationProperty Name="Set" Relationship="Z_PRDETAIL_CDS.assoc_params_to_items" FromRole="FromRole_assoc_params_to_items" ToRole="ToRole_assoc_params_to_items"/>
+            </EntityType>
+            <EntityType Name="Z_PRDETAIL_CDSType" sap:label="Detail Purchase Requisition" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="PurchaseRequisition"/>
+                    <PropertyRef Name="PurchaseRequisitionItem"/>
+                </Key>
+                <Property Name="PurchaseRequisition" Type="Edm.String" Nullable="false" MaxLength="10" sap:display-format="UpperCase" sap:label="Purchase Requisition" sap:quickinfo="Purchase Requisition Number"/>
+                <Property Name="PurchaseRequisitionItem" Type="Edm.String" Nullable="false" MaxLength="5" sap:display-format="NonNegative" sap:label="Requisn. item" sap:quickinfo="Item number of purchase requisition"/>
+                <Property Name="p_banfn" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="PR Parameter"/>
+                <Property Name="p_bnfpo" Type="Edm.String" MaxLength="5" sap:display-format="NonNegative" sap:label="Item Parameter"/>
+                <Property Name="PurchaseReqnCreationDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Creation Date" sap:quickinfo="Purchasing Document Creation Date"/>
+                <Property Name="Material" Type="Edm.String" MaxLength="40" sap:display-format="UpperCase" sap:label="Material" sap:quickinfo="Material Number"/>
+                <Property Name="PurchaseRequisitionItemText" Type="Edm.String" MaxLength="40" sap:label="Short Text"/>
+                <Property Name="Plant" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Plant"/>
+                <Property Name="PurchasingGroup" Type="Edm.String" MaxLength="3" sap:display-format="UpperCase" sap:label="Purchasing Group"/>
+                <Property Name="PRQuantity" Type="Edm.Decimal" Precision="13" Scale="3" sap:unit="PRUnit" sap:label="Quantity requested" sap:quickinfo="Purchase requisition quantity"/>
+                <Property Name="PRUnit" Type="Edm.String" MaxLength="3" sap:label="Unit of Measure" sap:quickinfo="Purchase requisition unit of measure" sap:semantics="unit-of-measure"/>
+                <Property Name="PurchaseRequisitionPrice" Type="Edm.Decimal" Precision="12" Scale="3" sap:unit="PurReqnItemCurrency" sap:label="Valuation Price" sap:quickinfo="Price in Purchase Requisition"/>
+                <Property Name="PurReqnItemCurrency" Type="Edm.String" MaxLength="5" sap:display-format="UpperCase" sap:label="Currency" sap:quickinfo="Currency Key" sap:semantics="currency-code"/>
+                <Property Name="PurchaseOrder" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="Purchase Order" sap:quickinfo="Purchase Order Number"/>
+                <Property Name="POQuantity" Type="Edm.Decimal" Precision="13" Scale="3" sap:unit="POUnit" sap:label="Order Quantity" sap:quickinfo="Purchase Order Quantity"/>
+                <Property Name="POUnit" Type="Edm.String" MaxLength="3" sap:label="Order Unit" sap:quickinfo="Purchase Order Unit of Measure" sap:semantics="unit-of-measure"/>
+                <Property Name="NetAmount" Type="Edm.Decimal" Precision="14" Scale="3" sap:unit="DocumentCurrency" sap:label="Net Order Value" sap:quickinfo="Net Order Value in PO Currency"/>
+                <Property Name="DocumentCurrency" Type="Edm.String" MaxLength="5" sap:display-format="UpperCase" sap:label="Currency" sap:quickinfo="Currency Key" sap:semantics="currency-code"/>
+                <Property Name="GRDocument" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="Material Document" sap:quickinfo="Number of Material Document"/>
+                <Property Name="GRQuantity" Type="Edm.Decimal" Precision="13" Scale="3" sap:unit="GRUnit" sap:label="Quantity"/>
+                <Property Name="GRUnit" Type="Edm.String" MaxLength="3" sap:label="Order Unit" sap:quickinfo="Purchase Order Unit of Measure" sap:semantics="unit-of-measure"/>
+                <Property Name="IRDocument" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="Material Document" sap:quickinfo="Number of Material Document"/>
+                <Property Name="PurchaseOrderAmount" Type="Edm.Decimal" Precision="14" Scale="3" sap:unit="Currency" sap:label="Amount" sap:quickinfo="Amount in Document Currency"/>
+                <Property Name="Currency" Type="Edm.String" MaxLength="5" sap:display-format="UpperCase" sap:label="Currency" sap:quickinfo="Currency Key" sap:semantics="currency-code"/>
+                <Property Name="PostingDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Posting Date" sap:quickinfo="Posting Date in the Document"/>
+                <Property Name="PaymentStatus" Type="Edm.String" MaxLength="15"/>
+                <Property Name="DayOpen" Type="Edm.Int32"/>
+                <Property Name="IsClosed" Type="Edm.String" MaxLength="1" sap:label="Is Closed" sap:quickinfo="PO Is Closed"/>
+                <Property Name="IsCompletelyDelivered" Type="Edm.String" MaxLength="1" sap:label="Completely Delivered" sap:quickinfo="PR Is Completely Delivered"/>
+            </EntityType>
+            <Association Name="assoc_params_to_items">
+                <End Type="Z_PRDETAIL_CDS.Z_PRDETAIL_CDSParameters" Role="FromRole_assoc_params_to_items" Multiplicity="1"/>
+                <End Type="Z_PRDETAIL_CDS.Z_PRDETAIL_CDSType" Role="ToRole_assoc_params_to_items" Multiplicity="*"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_assoc_params_to_items">
+                        <PropertyRef Name="p_banfn"/>
+                        <PropertyRef Name="p_bnfpo"/>
+                    </Principal>
+                    <Dependent Role="ToRole_assoc_params_to_items">
+                        <PropertyRef Name="p_banfn"/>
+                        <PropertyRef Name="p_bnfpo"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <EntityContainer Name="Z_PRDETAIL_CDS_Entities" m:IsDefaultEntityContainer="true" sap:message-scope-supported="true" sap:supported-formats="atom json xlsx">
+                <EntitySet Name="Z_PRDETAIL_CDS" EntityType="Z_PRDETAIL_CDS.Z_PRDETAIL_CDSParameters" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+                <EntitySet Name="Z_PRDETAIL_CDSSet" EntityType="Z_PRDETAIL_CDS.Z_PRDETAIL_CDSType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+                <EntitySet Name="Z_PRDetail" EntityType="Z_PRDETAIL_CDS.Z_PRDETAIL_CDSType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+                <AssociationSet Name="assoc_params_to_items_Set" Association="Z_PRDETAIL_CDS.assoc_params_to_items">
+                    <End EntitySet="Z_PRDETAIL_CDS" Role="FromRole_assoc_params_to_items"/>
+                    <End EntitySet="Z_PRDETAIL_CDSSet" Role="ToRole_assoc_params_to_items"/>
+                </AssociationSet>
+            </EntityContainer>
+            <atom:link rel="self" href="/sap/opu/odata/sap/Z_PRDETAIL_CDS/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <atom:link rel="latest-version" href="/sap/opu/odata/sap/Z_PRDETAIL_CDS/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

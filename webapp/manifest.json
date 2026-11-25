@@ -1,0 +1,183 @@
+{
+  "_version": "1.73.1",
+  "sap.app": {
+    "id": "prpayment.projectprpayment",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.28.0",
+      "toolsId": "1508cfae-3464-4e16-9cf1-0690d5ce213c"
+    },
+    "dataSources": {
+      "Z_PRTOPAYMENT_CDS_VAN": {
+        "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='Z_PRTOPAYMENT_CDS_VAN',Version='0001')/$value/",
+        "type": "ODataAnnotation",
+        "settings": {
+          "localUri": "localService/mainService/Z_PRTOPAYMENT_CDS_VAN.xml"
+        }
+      },
+      "Z_PRDETAIL_CDS_VAN": {
+        "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='Z_PRDETAIL_CDS_VAN',Version='0001')/$value/",
+        "type": "ODataAnnotation",
+        "settings": {
+          "localUri": "localService/itemService/Z_PRDETAIL_CDS_VAN.xml"
+        }
+      },
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/Z_PRTOPAYMENT_CDS/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "Z_PRTOPAYMENT_CDS_VAN"
+          ],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "itemService": {
+        "uri": "/sap/opu/odata/sap/Z_PRDETAIL_CDS/",
+        "type": "OData",
+        "settings": {
+          "annotations":[
+            "Z_PRDETAIL_CDS_VAN"
+          ],
+          "localUri": "localService/itemService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ZPRPay_isma-ZPRPay": {
+          "semanticObject": "ZPRPay_isma",
+          "action": "ZPRPay",
+          "title": "{{ZPRPay_isma-ZPRPay.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.136.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.ui.layout": {},
+        "sap.ui.export": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "prpayment.projectprpayment.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {}
+      },
+      "itemService" : {
+        "dataSource":"itemService",
+        "preload": true,
+        "settings": {}
+      }, 
+      "prDetail": {
+        "dataSource": "itemService",
+        "preload": false,
+        "settings": {
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline"
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "prpayment.projectprpayment.view",
+        "async": true,
+        "viewPath": "prpayment.projectprpayment.view"
+      },
+      "routes": [
+        {
+          "name": "RouteView1",
+          "pattern": ":?query:",
+          "target": [
+            "TargetView1"
+          ]
+        },
+        {
+          "name": "RouteDetail",
+          "pattern": "{PurchaseRequisition}/{PurchaseRequisitionItem}",
+          "target": [
+            "TargetDetail"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetView1": {
+          "id": "View1",
+          "name": "View1",
+          "level": 1
+        },
+        "TargetDetail": {
+          "id": "Detail",
+          "name": "Detail",
+          "level": 2
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "prpayment.projectprpayment.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}

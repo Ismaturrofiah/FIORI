@@ -1,0 +1,57 @@
+ /* Custom Styling for PR to Payment Report */
+
+ .kpiTile {
+     cursor: pointer;
+     border-radius: 8px;
+     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+     border-top: 3px solid var(--sapBrandColor, #0854a0);
+ }
+
+ .kpiTile:hover {
+     transform: translateY(-2px);
+     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+ }
+
+ .kpiTileSuccess {
+     border-top: 3px solid #2b7c2b;
+ }
+
+ .kpiTileCritical {
+     border-top: 3px solid #e9730c;
+ }
+
+ .kpiTileError {
+     border-top: 3px solid #bb0000;
+ }
+
+ .filterPanel {
+     border-radius: 8px;
+     background-color: var(--sapList_Background, #ffffff);
+     border: 1px solid var(--sapList_BorderColor, #e5e5e5);
+ }
+
+ .sapMListTblCell {
+     vertical-align: middle !important;
+ }
+
+ .reportTableScrollContainer {
+     width: 100%;
+     overflow-x: auto;
+ }
+
+ .reportTable {
+     min-width: 3050px;
+ }
+
+ .paginationToolbar {
+     background: var(--sapList_Background, #ffffff);
+     border: 1px solid var(--sapList_BorderColor, #e5e5e5);
+     border-radius: 6px;
+     padding: 0.25rem 0.5rem;
+ }
+
+ .pageNumberBtn {
+     min-width: 36px !important;
+     font-weight: bold;
+ }

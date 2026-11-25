@@ -1,0 +1,257 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog
+        id="detailDialog"
+        title="{i18n>detailDialogTitle}"
+        contentWidth="750px"
+        contentHeight="550px"
+        resizable="true"
+        draggable="true">
+        <customHeader>
+            <Bar>
+                <contentLeft>
+                    <core:Icon src="sap-icon://chain-link" class="sapUiTinyMarginBegin"/>
+                    <Title text="{i18n>detailDialogTitle}" level="H3"/>
+                </contentLeft>
+                <contentRight>
+                    <ObjectStatus
+                        class="sapUiSmallMarginEnd"
+                        text="{detailModel>/PaymentStatus}"
+                        state="{
+                            path: 'detailModel>/PaymentStatus',
+                            formatter: '.formatter.statusState'
+                        }"
+                        icon="{
+                            path: 'detailModel>/PaymentStatus',
+                            formatter: '.formatter.statusIcon'
+                        }"
+                        inverted="true" />
+                </contentRight>
+            </Bar>
+        </customHeader>
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <!-- Section 1: PR -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionPR}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://request" color="#0a6ed1" />
+                            <Title text="{i18n>sectionPR}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{detailModel>/PurchaseRequisition} / {detailModel>/PurchaseRequisitionItem}"
+                                state="Information"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <f:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <f:content>
+                            <core:Title text="Informasi Dokumen" />
+                            <Label text="{i18n>lblPRNum}"/>
+                            <Text text="{detailModel>/PurchaseRequisition}" />
+
+                            <Label text="{i18n>lblPRItem}"/>
+                            <Text text="{detailModel>/PurchaseRequisitionItem}" />
+
+                            <Label text="{i18n>lblPRDateVal}"/>
+                            <Text text="{
+                                path: 'detailModel>/PurchaseReqnCreationDate',
+                                formatter: '.formatter.formatDate'
+                            }" />
+
+                            <Label text="{i18n>lblPlantVal}"/>
+                            <Text text="{detailModel>/Plant}" />
+
+                            <Label text="{i18n>lblPurchasingGroupVal}"/>
+                            <Text text="{detailModel>/PurchasingGroup}" />
+
+                            <core:Title text="Detail Material &amp; Valuasi" />
+                            <Label text="{i18n>lblMaterialCode}"/>
+                            <Text text="{detailModel>/Material}" />
+
+                            <Label text="{i18n>lblMaterialDesc}"/>
+                            <Text text="{detailModel>/PurchaseRequisitionItemText}" />
+
+                            <Label text="{i18n>lblPRQty}"/>
+                            <Text text="{detailModel>/PRQuantity} {detailModel>/PRUnit}" />
+
+                            <Label text="{i18n>lblPRPrice}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/PurchaseRequisitionPrice',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/PurReqnItemCurrency}" />
+                        </f:content>
+                    </f:SimpleForm>
+                </Panel>
+
+                <!-- Section 2: PO -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionPO}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://cart" color="#e9730c" />
+                            <Title text="{i18n>sectionPO}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/PurchaseOrder} ? ${detailModel>/PurchaseOrder} : 'Belum Ada PO' }"
+                                state="{= ${detailModel>/PurchaseOrder} ? 'Success' : 'Warning' }"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <f:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <f:content>
+                            <Label text="{i18n>lblPONum}"/>
+                            <Text text="{= ${detailModel>/PurchaseOrder} ? ${detailModel>/PurchaseOrder} : '-' }" />
+
+                            <Label text="{i18n>lblPOQty}"/>
+                            <Text text="{= ${detailModel>/PurchaseOrder} ? (${detailModel>/POQuantity} + ' ' + ${detailModel>/POUnit}) : '-' }" />
+
+                            <Label text="{i18n>lblPONetAmount}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/NetAmount',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/DocumentCurrency}"
+                                state="Success" />
+                        </f:content>
+                    </f:SimpleForm>
+                </Panel>
+
+                <!-- Section 3: Goods Receipt -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionGR}"
+                    class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://shipping-status" color="#2b7c2b" />
+                            <Title text="{i18n>sectionGR}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/GRDocument} ? ${detailModel>/GRDocument} : 'Belum Ada GR' }"
+                                state="{= ${detailModel>/GRDocument} ? 'Success' : 'None' }"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <f:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <f:content>
+                            <Label text="{i18n>lblGRDoc}"/>
+                            <Text text="{= ${detailModel>/GRDocument} ? ${detailModel>/GRDocument} : '-' }" />
+
+                            <Label text="{i18n>lblGRQty}"/>
+                            <Text text="{= ${detailModel>/GRDocument} ? (${detailModel>/GRQuantity} + ' ' + ${detailModel>/GRUnit}) : '-' }" />
+                        </f:content>
+                    </f:SimpleForm>
+                </Panel>
+
+                <!-- Section 4: Invoice Receipt & Payment -->
+                <Panel
+                    expandable="true"
+                    expanded="true"
+                    headerText="{i18n>sectionIR}">
+                    <headerToolbar>
+                        <OverflowToolbar height="3rem">
+                            <core:Icon src="sap-icon://receipt" color="#107e3e" />
+                            <Title text="{i18n>sectionIR}" level="H4"/>
+                            <ToolbarSpacer/>
+                            <ObjectStatus
+                                text="{= ${detailModel>/IRDocument} ? ${detailModel>/IRDocument} : 'Belum Ada Tagihan' }"
+                                state="{= ${detailModel>/IRDocument} ? 'Success' : 'None' }"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <f:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="2">
+                        <f:content>
+                            <core:Title text="Detail Verifikasi Invoice" />
+                            <Label text="{i18n>lblIRDoc}"/>
+                            <Text text="{= ${detailModel>/IRDocument} ? ${detailModel>/IRDocument} : '-' }" />
+
+                            <Label text="{i18n>lblPOAmount}"/>
+                            <ObjectNumber
+                                number="{
+                                    path: 'detailModel>/PurchaseOrderAmount',
+                                    formatter: '.formatter.formatCurrency'
+                                }"
+                                unit="{detailModel>/Currency}" />
+
+                            <Label text="{i18n>lblPostingDateVal}"/>
+                            <Text text="{
+                                path: 'detailModel>/PostingDate',
+                                formatter: '.formatter.formatDate'
+                            }" />
+
+                            <core:Title text="Status Pembayaran &amp; Aging" />
+                            <Label text="{i18n>lblPaymentStatusVal}"/>
+                            <ObjectStatus
+                                text="{detailModel>/PaymentStatus}"
+                                state="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusState'
+                                }"
+                                icon="{
+                                    path: 'detailModel>/PaymentStatus',
+                                    formatter: '.formatter.statusIcon'
+                                }" />
+
+                            <Label text="{i18n>lblDayOpenVal}"/>
+                            <ObjectStatus
+                                text="{detailModel>/DayOpen} Hari"
+                                state="{
+                                    path: 'detailModel>/DayOpen',
+                                    formatter: '.formatter.dayOpenState'
+                                }" />
+                        </f:content>
+                    </f:SimpleForm>
+                </Panel>
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="{i18n>btnClose}" type="Emphasized" press=".onCloseDetailDialog" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>
